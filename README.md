@@ -18,14 +18,25 @@ This project provides a simple Flask-based web server used as the experimental t
 - Error handling for 404 and 500 errors
 
 ## Run Instructions
+
+### 1. Start the Server
 1. Install dependencies:
    `pip install -r requirements.txt`
 
 2. Run the server:
    `python app.py`
 
-3. Open in browser:
+3. The server will be available at:
    `http://127.0.0.1:5000/`
+
+### 2. Run the Baseline Test
+To measure the server's performance under normal traffic conditions, run the baseline testing script while the server is running.
+
+1. Open a **new, separate** terminal window.
+2. Navigate into the baseline test folder:
+   `cd baseline_test`
+3. Run the test script:
+   `python baseline_test.py`
 
 ## Purpose in the Project
 This server is the base infrastructure used for:
