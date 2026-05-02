@@ -33,8 +33,10 @@ This project provides a simple Flask-based web server used as the experimental t
 To measure the server's performance under normal traffic conditions, run the baseline testing script while the server is running.
 
 1. Open a **new, separate** terminal window.
+
 2. Navigate into the baseline test folder:
    `cd baseline_test`
+   
 3. Run the test script:
    `python baseline_test.py`
 
