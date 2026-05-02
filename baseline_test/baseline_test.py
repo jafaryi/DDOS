@@ -21,7 +21,6 @@ def run_baseline_test():
         response_times = []
         success_count = 0
         
-        # Track time specifically for this endpoint's RPS
         start_ep_time = time.time()
         
         for _ in range(NUM_REQUESTS_PER_ENDPOINT):
@@ -78,7 +77,7 @@ def generate_chart(results):
     plt.ylabel('Average Response Time (ms)')
     plt.grid(axis='y', linestyle='--', alpha=0.7)
     plt.savefig('baseline_chart.png')
-    plt.close() # Close figure to avoid memory leaks
+    plt.close()
     print("\nChart saved as 'baseline_chart.png'.")
 
 def generate_table(results):
@@ -97,7 +96,6 @@ def generate_table(results):
 
     fig, ax = plt.subplots(figsize=(9, 4))
     
-    # Hide axes
     ax.axis('tight')
     ax.axis('off')
 
@@ -105,16 +103,15 @@ def generate_table(results):
     table = ax.table(cellText=cell_text, colLabels=columns, loc='center', cellLoc='center')
     table.auto_set_font_size(False)
     table.set_fontsize(10)
-    table.scale(1, 1.8) # Adjust row height
+    table.scale(1, 1.8)
 
-    # Style the header row
     for (row, col), cell in table.get_celld().items():
         if row == 0:
             cell.set_text_props(weight='bold')
             cell.set_facecolor('#e0e0e0')
 
     plt.title('Baseline Performance Metrics', pad=20, weight='bold')
-    plt.savefig('baseline_table.png', bbox_inches='tight', dpi=300) # High-res export
+    plt.savefig('baseline_table.png', bbox_inches='tight', dpi=300)
     plt.close()
     print("Table saved as 'baseline_table.png'.")
 
