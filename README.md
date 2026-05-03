@@ -47,3 +47,14 @@ This server is the base infrastructure used for:
 - monitoring experiments
 - mitigation analysis
 
+## Test results
+
+### 1. Baseline test (no attack)
+Under normal traffic conditions, the web server is highly stable and responsive. 
+We tested the system with standard, low-concurrency traffic and achieved a 100% success rate across all endpoints.
+
+The overall throughput was 76.53 Requests Per Second (RPS).
+Standard endpoints like /, /data, and /health performed exceptionally well, with average response times around 2-6 ms. 
+As expected by the design, the /compute endpoint had a higher baseline latency of about 40 ms due to the intentional CPU loop, but it still resolved successfully every time. 
+This establishes a healthy, functioning baseline before we introduce the simulated attack.
+
