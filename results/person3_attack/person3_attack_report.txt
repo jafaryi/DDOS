@@ -1,0 +1,34 @@
+Person 3 — Controlled DDoS-like Traffic Simulation Report
+============================================================
+
+1. Attack scenario description
+----------------------------------------
+This lab simulates a controlled, high-concurrency HTTP GET flood against the group's own Flask server on 127.0.0.1:5000. Each scenario issues a fixed batch of 200 requests using ThreadPoolExecutor with a set worker count (concurrency). The goal is to observe latency, throughput, and error behavior under load—not to attack any external system.
+
+2. Tested endpoint
+----------------------------------------
+  /compute  (full URL: http://127.0.0.1:5000/compute)
+
+3. Traffic levels (concurrency)
+----------------------------------------
+  Concurrency values tested: 5, 10, 25, 50
+  Total requests per level: 200
+
+4. What happened during the attack (measured)
+----------------------------------------
+  Concurrency  5: success 100.0% | avg 567.61 ms | max 1370.31 ms | RPS 8.75 | failed 0
+  Concurrency 10: success 100.0% | avg 1148.44 ms | max 2187.19 ms | RPS 8.55 | failed 0
+  Concurrency 25: success 100.0% | avg 2699.73 ms | max 3511.81 ms | RPS 8.76 | failed 0
+  Concurrency 50: success 22.0% | avg 4471.77 ms | max 5037.21 ms | RPS 9.9 | failed 156
+
+5. First comparison with Person 2 baseline
+----------------------------------------
+Baseline (normal traffic) success rate was 100.0%. Overall baseline throughput was about 76.53 RPS across endpoints.
+For this endpoint, baseline average response time was about 38.45 ms.
+Baseline /compute also had max latency about 61.86 ms and endpoint RPS about 26.01 under low-concurrency testing.
+In this run, highest average latency was at concurrency 50 (4471.77 ms). Highest throughput (RPS) among tested levels was 9.9 at concurrency 50.
+Compared with the baseline, the DDoS-like request flood increased response time and changed stability/throughput depending on concurrency level. The /compute endpoint is affected more strongly than light endpoints because it performs CPU-intensive work per request, so many overlapping calls queue and compete for CPU.
+
+6. Conclusion
+----------------------------------------
+The local server shows measurable stress under concurrent load: latencies rise and some requests may fail or time out as contention increases. Use these artifacts alongside baseline_test output for before/under-load analysis.

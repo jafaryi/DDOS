@@ -17,12 +17,13 @@ This server is not designed for real production use. It is designed for a contro
 
 ## Project Structure
 
-- `app.py` : main Flask web server
-- `server_validation.py` : checks whether the server endpoints are working correctly
-- `baseline_test.py` : measures normal traffic performance
-- `requirements.txt` : project dependencies
-- `logs/server.log` : request log file generated while the server is running
-- `baseline_chart.png` : chart generated from the baseline test
+- `app.py` — main Flask web server
+- `server_validation.py` — checks whether the server endpoints are working correctly
+- `baseline_test/baseline_test.py` — measures normal traffic performance (Person 2)
+- `attack_test.py` — controlled high-concurrency traffic simulation (Person 3)
+- `requirements.txt` — project dependencies
+- `logs/server.log` — request log file generated while the server is running
+- `baseline_test/baseline_chart.png`, `baseline_test/baseline_table.png` — charts from the baseline test (generated when you run the baseline script from that folder)
 
 ---
 
@@ -30,12 +31,12 @@ This server is not designed for real production use. It is designed for a contro
 
 The server includes several endpoints with different purposes:
 
-- `/` : basic server response
-- `/test` : simple text response
-- `/data` : JSON response similar to a simple API
-- `/slow` : delayed response for latency testing
-- `/health` : health-check endpoint for service availability
-- `/compute` : CPU-intensive endpoint for stress and monitoring experiments
+- `/` — basic server response
+- `/test` — simple text response
+- `/data` — JSON response similar to a simple API
+- `/slow` — delayed response for latency testing
+- `/health` — health-check endpoint for service availability
+- `/compute` — CPU-intensive endpoint for stress and monitoring experiments
 
 The `/compute` endpoint was added intentionally to create more visible CPU activity during later monitoring and stress-testing phases.
 
@@ -64,30 +65,22 @@ pip install -r requirements.txt
 ---
 
 ## Run Instructions
-<<<<<<< HEAD
-=======
 
-### 1. Start the Server
-1. Install dependencies:
-   `pip install -r requirements.txt`
->>>>>>> fc9201bc3912739e5040d8d5acdbcad41769a7b0
+### 1. Start the server
 
-### 1. Start the Server
-
-<<<<<<< HEAD
-Run the Flask server:
+From the project root:
 
 ```bash
 python app.py
 ```
 
-The server will be available at:
+The server listens on port 5000. For local experiments, use:
 
 ```text
 http://127.0.0.1:5000/
 ```
 
-You can test the server manually in a browser using:
+You can try these in a browser:
 
 ```text
 http://127.0.0.1:5000/
@@ -99,106 +92,78 @@ http://127.0.0.1:5000/slow
 
 ---
 
-### 2. Validate the Server Infrastructure
+### 2. Validate the server infrastructure
 
-Before running performance experiments, the server can be validated to make sure all endpoints are working correctly.
-
-Open a new terminal while the server is still running, then run:
+With the server still running, open a **second** terminal at the project root and run:
 
 ```bash
 python server_validation.py
 ```
 
-The validation script checks whether the implemented endpoints return the expected HTTP status codes.
-
-Expected validation output:
-
-```text
-Checking server endpoints...
-
-/          OK - 200
-/health    OK - 200
-/data      OK - 200
-/compute   OK - 200
-/slow      OK - 200
-/wrong     OK - 404
-
-Server validation completed successfully.
-```
-
-This validation step is not a performance test.  
-It only confirms that the web server infrastructure is working correctly and is ready for the next phases of the project.
+This checks that endpoints return the expected HTTP status codes. It is not a performance test.
 
 ---
 
-### 3. Run the Baseline Test
+### 3. Run the baseline test (Person 2)
 
-To measure the server's performance under normal traffic conditions, run the baseline testing script while the server is running.
-
-Open a new terminal and run:
+With the server still running, open another terminal:
 
 ```bash
+cd baseline_test
 python baseline_test.py
 ```
 
-The baseline test measures:
+This measures average and max response time, success rate, and endpoint RPS under low-concurrency traffic. It writes `baseline_chart.png` and `baseline_table.png` in the `baseline_test` folder (current working directory).
 
-- average response time
-- minimum response time
-- maximum response time
-- success rate
-- overall requests per second
+---
 
-It also generates a chart named:
+### 4. Run the controlled attack simulation (Person 3)
 
-```text
-baseline_chart.png
+With the server still running, open another terminal at the **project root** (not inside `baseline_test`):
+
+```bash
+python attack_test.py
+```
+
+Optional: stress a lighter endpoint instead of the default CPU-heavy `/compute`:
+
+```bash
+python attack_test.py --endpoint /health
+python attack_test.py --endpoint /data
 ```
 
 ---
 
-## Test Results
+## Person 3 — Controlled DDoS-like Traffic Simulation
 
-### Baseline Test: Normal Traffic Condition
+**Purpose:** Person 3 runs a **bounded, local-only** burst of concurrent HTTP GET requests against `http://127.0.0.1:5000` to observe latency, throughput, and failures under load. This mimics aspects of a DDoS-like flood in a **safe educational setting**.
 
-Under normal traffic conditions, the web server was stable and responsive.
+**Safety:** Use this only against your own Flask instance on this machine. The script targets **127.0.0.1** only, uses fixed request counts, and uses moderate concurrency levels suitable for a laptop lab. Do not retarget it at external sites or shared infrastructure.
 
-The system was tested with standard, low-concurrency traffic and achieved a 100% success rate across all tested endpoints.
+**How to run:**
 
-The overall throughput was:
+1. Start the server: `python app.py`
+2. Open a second terminal at the project root
+3. Run: `python attack_test.py` (optional: `--endpoint /health` or `--endpoint /data`)
 
-```text
-76.53 Requests Per Second
-```
+**Generated outputs** (under `results/person3_attack/`):
 
-Standard endpoints such as `/`, `/data`, and `/health` performed very well, with average response times around 2–6 ms.
+| File | Description |
+|------|-------------|
+| `attack_results.csv` | Tabular metrics per concurrency level |
+| `attack_results.json` | Same data in JSON for tooling or reports |
+| `attack_chart_avg_response_time.png` | Average response time vs concurrency |
+| `attack_chart_rps.png` | Throughput (RPS) vs concurrency |
+| `attack_table.png` | Summary table image of attack metrics |
+| `person3_attack_report.txt` | Short narrative: scenario, observations, and comparison to baseline |
 
-The `/compute` endpoint had a higher baseline latency of about 40 ms because it includes an intentional CPU loop. However, it still responded successfully in every test.
-
-These results establish a healthy baseline before introducing the simulated DDoS-like traffic.
+**Connection to baseline:** Person 2 measured normal baseline behavior. Person 3 measures behavior under a controlled high-concurrency request flood and compares it with the baseline numbers in the generated report.
 
 ---
-=======
-3. The server will be available at:
-   `http://127.0.0.1:5000/`
->>>>>>> fc9201bc3912739e5040d8d5acdbcad41769a7b0
-
-### 2. Run the Baseline Test
-To measure the server's performance under normal traffic conditions, run the baseline testing script while the server is running.
-
-1. Open a **new, separate** terminal window.
-
-2. Navigate into the baseline test folder:
-   `cd baseline_test`
-   
-3. Run the test script:
-   `python baseline_test.py`
 
 ## Purpose in the Project
 
-This server is the base infrastructure used by the whole group.
-
-It supports:
+This server is the base infrastructure used by the whole group. It supports:
 
 - baseline testing
 - DDoS-like traffic simulation
@@ -206,36 +171,28 @@ It supports:
 - mitigation analysis
 - before-and-after comparison
 
-<<<<<<< HEAD
-Person 1 is responsible for creating and validating this experimental web infrastructure.
+**Roles:**
 
-Person 2 uses this server for baseline performance testing.
+- **Person 1** — experimental web infrastructure and validation.
+- **Person 2** — baseline performance testing.
+- **Person 3** — controlled DDoS-like traffic simulation (this repo includes `attack_test.py`).
+- **Person 4** — system monitoring under different traffic conditions.
+- **Person 5** — mitigation (e.g. rate limiting) and before/after comparison.
 
-Person 3 uses this server as the target for controlled DDoS-like traffic simulation.
+---
 
-Person 4 monitors the system behavior while the server is under different traffic conditions.
+## Test Results
 
-Person 5 applies mitigation techniques such as rate limiting and compares the results before and after mitigation.
+### Baseline test (normal traffic)
+
+Under normal traffic conditions, the web server was stable and responsive. The system was tested with standard, low-concurrency traffic and achieved a **100%** success rate across tested endpoints.
+
+Overall throughput was about **76.53** requests per second (RPS). Endpoints such as `/`, `/data`, and `/health` showed low average latency (on the order of a few to ~10 ms in sample runs). The `/compute` endpoint had higher baseline latency (CPU-bound work) while still succeeding consistently in baseline runs.
+
+These results establish a baseline before introducing simulated high-concurrency traffic. After running `attack_test.py`, compare `results/person3_attack/` artifacts with the baseline outputs in `baseline_test/`.
 
 ---
 
 ## Notes
 
-This project is designed for educational purposes only.
-
-The DDoS-like traffic used in this project must be generated only in a controlled local environment against our own test server.
-
-The goal is not to perform a real cyberattack, but to study how high-rate traffic affects availability, performance, and resilience in a small web infrastructure.
-=======
-## Test results
-
-### 1. Baseline test (no attack)
-Under normal traffic conditions, the web server is highly stable and responsive. 
-We tested the system with standard, low-concurrency traffic and achieved a 100% success rate across all endpoints.
-
-The overall throughput was 76.53 Requests Per Second (RPS).
-Standard endpoints like /, /data, and /health performed exceptionally well, with average response times around 2-6 ms. 
-As expected by the design, the /compute endpoint had a higher baseline latency of about 40 ms due to the intentional CPU loop, but it still resolved successfully every time. 
-This establishes a healthy, functioning baseline before we introduce the simulated attack.
-
->>>>>>> fc9201bc3912739e5040d8d5acdbcad41769a7b0
+This project is for **educational purposes only**. DDoS-like traffic must be generated only in a controlled local environment against this test server. The goal is to study effects on availability and performance—not to perform real attacks on external systems.
